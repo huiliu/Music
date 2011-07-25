@@ -1,6 +1,7 @@
 #!/usr/bin/python3.1
 
 from urllib.request import urlopen
+from urllib.parse import urlencode, unquote, quote
 import re
 
 def singer():
@@ -29,10 +30,33 @@ def singer():
         sing_list[ singer_name ] =  singer_url
     return sing_list
 
+
+def albumList( singer ):
+    url = 'http://mp3.baidu.com/singerlist/' + quote( singer, encoding = 'gbk' ) + '.html'
+    print( url )
+
+    all_album = urlopen( url ).read().decode('gbk').replace('\n', '')
+    reg_albums = re.compile('《.*?》')
+    reg_album = re.compile('>.*?<')
+    reg_href = re.compile('href=".*?"')
+    albums = reg_albums.findall( all_album )
+    
+    album_list = {}
+
+    for tmp in albums:
+        album_name = reg_album.findall( tmp )[0][1:-1]
+        album_url = reg_href.findall( tmp )[0][6:-1]
+        album_list[album_name] = album_list
+        print( album_name + '\n' + album_url )
+
+
+
+
 if __name__ == '__main__':
-    singers = singer()
-    url = singers['A ONE']
-    songName = song(url)
-    print(songName)
+#   singers = singer()
+#   url = singers['A ONE']
+#   songName = song(url)
 #   for name, url in singers.items():
 #       print(name)
+#   print(url)
+    albumList( '王菲' )
