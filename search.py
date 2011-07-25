@@ -5,11 +5,11 @@ import urllib.parse
 import songlist
 
 def search ( keyword, t_flags = -1 ):
-"""
-    This function use to setup parameter use to search song you want to
-    listen.
-
-"""
+    """
+        This function use to setup parameter use to search song you want to
+        listen.
+    
+    """
 
     data = {}
     data['f'] = 'ms'
@@ -31,6 +31,8 @@ def search ( keyword, t_flags = -1 ):
 
     for name, url in page.items():
         print(name)
+    
+    return page
 
 if __name__ == '__main__':
     search( 'on the night' )
