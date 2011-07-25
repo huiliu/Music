@@ -40,7 +40,8 @@ def song( singerurl ):
 if __name__ == '__main__':
 #   print( song('a.html') )
 #   print( len(song('a.html')) )
-    url = 'http://mp3.baidu.com/m?rf=top-singer&tn=baidump3&ct=134217728&lm=-1&word=A+BOYS%C0%D6%B6%D3'
+    #url = 'http://mp3.baidu.com/m?rf=top-singer&tn=baidump3&ct=134217728&lm=-1&word=A+BOYS%C0%D6%B6%D3'
+    url = 'http://mp3.baidu.com/m?f=3&tn=baidump3&ct=134217728&lf=&rn=&word=%B4%AB%C6%E6+%CD%F5%B7%C6&lm=-1&oq=%B4%AB%C6%E6&rsp=0'
     Song = song( url )
     print(len(Song))
     for name, url in Song.items():
