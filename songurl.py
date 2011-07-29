@@ -17,8 +17,11 @@ def song_url( url ):
     reg_head = re.compile('encurl.*?,')
     
 #   url = 'http://box.zhangmen.baidu.com/m?word=mp3,,,[%B0%B2%B2%AE%D5%FE]&cat=0&ct=134217728&tn=baidusg,%BD%C5%CC%A4%B3%B5++&si=%BD%C5%CC%A4%B3%B5;;%B0%B2%B2%AE%D5%FE;;9614;;9614&lm=-1&sgid=1&size=3460300&attr=0,0&titlekey=466517228,3536576706'
+    url = 'http://box.zhangmen.baidu.com/m?word=mp3,,,[a+one]&cat=0&ct=134217728&tn=baidusg,%BD%D8%C8%AD%B5%C0++&si=%BD%D8%C8%AD%B5%C0;;a one;;0;;0&lm=-1&sgid=25&size=3670016&attr=0,0&titlekey=302577261,283678878'
+    print( url )
     data = urlopen(url).read().decode('gbk')
 
+    print( data )
     urllist = reg.findall(data,re.VERBOSE)[0][11:-1].replace("' + '", '').replace("'", '').split(',')
     head = reg_head.findall(data)[0][10:-2].replace("' + '", '')
 
