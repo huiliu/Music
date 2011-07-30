@@ -2,9 +2,25 @@
 
 from urllib.request import urlopen
 from urllib.parse import urlencode
+#from common import ParseHtml
 from html.parser import HTMLParser
 import re
 from pprint import pprint
+
+class ParseHtml(HTMLParser):
+    """
+        The Class use to parse HTML
+    """
+    text = ''
+    url = ''
+    def handle_starttag(self, tag, attrs):
+        if tag == 'a' and attrs:
+            for attr in attrs:
+                if attr[0] == 'href':
+                    self.url = attr[1]
+                    break
+    def handle_data(self, data):
+        self.text += data
 
 def search ( keyword, pageNum = 1 ):
     """
@@ -168,20 +184,6 @@ def DownloadLegal( url ):
     return 'http://mp3.baidu.com' + reg_url.findall(data)[0]
 
 
-class ParseHtml(HTMLParser):
-    """
-        The Class use to parse HTML
-    """
-    text = ''
-    url = ''
-    def handle_starttag(self, tag, attrs):
-        if tag == 'a' and attrs:
-            for attr in attrs:
-                if attr[0] == 'href':
-                    self.url = attr[1]
-                    break
-    def handle_data(self, data):
-        self.text += data
 
 def Interface():
     tips = """Please Type in the word what you want to search:\n"""
