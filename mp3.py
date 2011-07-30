@@ -7,7 +7,7 @@ import songlist
 
 mp3 = {}
 
-def ui():
+def interface():
     tips = """Would you want to search song by sing's name or song's name?
           input 0 , by singer's name
           input 1 , by song's name"""
