@@ -1,9 +1,10 @@
 #!/usr/bin/python3.2
 
 from urllib.request import urlopen
-import urllib.request
-import urllib.parse
+from urllib.parse import urlencode
+from html.parser import HTMLParser
 import re
+from pprint import pprint
 
 def search ( keyword, t_flags = -1 ):
     """
@@ -27,15 +28,12 @@ def search ( keyword, t_flags = -1 ):
 
 #you'd better setup the encoding's value is GBK, because type in
 #Chinese would result in error.
-    url_values = urllib.parse.urlencode(data, encoding = 'gbk')
+    url_values = urlencode(data, encoding = 'gbk')
     url = 'http://mp3.baidu.com/m'
     full_url = url + "?" + url_values
     print( full_url )
 
     page = songList( full_url )
-
-  # for name, url in page.items():
-  #     print(name)
     
     return page
 
@@ -43,13 +41,12 @@ def DownloadURL( song, singer, album = '' ):
     """
         Download the legal music.
     """
-
     data = {}
     data['song'] = song
     data['singer'] = singer
     data['album'] = album
 
-    url_values = urllib.parse.urlencode(data, encoding = 'gbk')
+    url_values = urlencode(data, encoding = 'gbk')
     url = 'http://mp3.baidu.com/d?' + url_values
 
     print(url)
@@ -61,12 +58,23 @@ def item( page, regExp ):
     data = []
 
     for tmp in regExp:
+        texts = []
         reg_tmp = re.compile( tmp )
         tmp_data = reg_tmp.findall( page )
- #      print( tmp_data )
-        data.append( reg_tmp.findall( page ) )
-    #Return 
-    return data
+        for text in tmp_data:
+            myParser = ParseHtml()
+            myParser.feed(text)
+            texts.append( myParser.text.strip() )
+        data.append( texts )
+    items = []
+    for index, title, singer, ablum, lyric, formation, size, speed in \
+        zip(data[0], data[1], data[2], data[3], \
+            data[4], data[5], data[6], data[7]):
+        item = [index, title, singer, ablum, lyric, formation, size, \
+                speed]
+        items.append( item )
+    pprint( items )
+    return items
 
 def songList( url ):
     """
@@ -89,40 +97,27 @@ def songList( url ):
                 '<td class="ninth">.*?<\/td>'\
                 ]
     
-    reg_song_url = re.compile('href=".*?"')
-    reg_song_name1 = re.compile('<a .*?>.*?<\/a>')
-    reg_song_name = re.compile('(<.*?>)|[\t\n\r\v\f]')
-    reg_song_size = re.compile('class="seventh">.*?<\/span>')
+    reg_pure = re.compile('[\n\t\r\v\f]')
 
     #Get Data that contain some information i need 
-    data = urlopen(url).read().decode('gbk').replace('\n','')
-    #data = reg_pure.sub( urlopen(url).read().decode('gbk'), '')
-    #data = open(singerurl).read().replace('\n','')
-    #songlist = reg_song.findall(data)
-    #songsize = reg_song_size.findall(data)
+    data = reg_pure.sub('', urlopen(url).read().decode('gbk'))
     lists = item( data, reg_list )
-    for tmp in lists:
-        print(tmp)
-        len(tmp)
+
+class ParseHtml(HTMLParser):
     """
-    index = reg_index.findall(data)
-
-    item = {}
-    Song = {}
-    for song,size in zip(songlist, songsize):
-        SongName = reg_song_name1.findall(song)[0]
-        SongName = reg_song_name.sub('',SongName)
-        if song.find('正版') != -1:
-            SongName += '(正版)'
-        SongURL = reg_song_url.findall(song)
-        if SongURL and size:
-            SongURL = SongURL[0][6:-1]
-            SongSize = size[len('class="seventh"><span>'):-8]
-            Song[SongName] = [SongSize, SongURL]
-    return Song
-            """
-
+        The Class use to parse HTML
+    """
+    text = ''
+    url = ''
+    def handle_starttag(self, tag, attrs):
+        if tag == 'a' and attrs:
+            for attr in attrs:
+                if attr[0] == 'href':
+                    self.url = attr[1]
+                    break
+    def handle_data(self, data):
+        self.text += data
 
 if __name__ == '__main__':
-    search( 'on the night' )
+    search( '传奇' )
     #DownloadURL('李健', '传奇')
