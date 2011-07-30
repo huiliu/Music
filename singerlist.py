@@ -1,10 +1,11 @@
 #!/usr/bin/python3.1
 
 from urllib.request import urlopen
-from urllib.parse import urlencode, unquote, quote
+from urllib.parse import urlencode, quote
+import search
 import re
 
-def singer():
+def singerList():
     """
     USAGE:
         return singer list.
@@ -23,19 +24,20 @@ def singer():
     data = urlopen(singer_url + '/' + page_list[0] + '.html').read().decode('gbk')
     singer = reg_singer.findall(data)
     
-    sing_list = {}
+    singer_list = []
     for x in singer:
-        singer_url = reg_list.findall(x)[0][6:-1]
+        #singer_url = reg_list.findall(x)[0][6:-1]
         singer_name = reg_name.findall(x)[2][1:-1]
-        sing_list[ singer_name ] =  singer_url
-    return sing_list
-
+        sing_list.append(singer_name)
+    return singer_list
 
 def albumList( singer ):
     """
         The Function use to analysis the album page.
         
         singer      the singer's name
+
+        Return the all album's Name as a list
     """
     url = 'http://mp3.baidu.com/singerlist/' + quote( singer, encoding = 'gbk' ) + '.html'
     all_album = urlopen( url ).read().decode('gbk').replace('\n', '')
@@ -46,14 +48,18 @@ def albumList( singer ):
     reg_href = re.compile('href=".*?"')
     albums = reg_albums.findall( all_album )
     
-    album_list = {}
+    #album_list = {}
+    album_list = []
 
     for tmp in albums:
         album_name = reg_album.findall( tmp )[0][1:-1]
-        album_url = reg_href.findall( tmp )[0][6:-1]
-        album_list[album_name] = album_url
-#Test: output the album and it's hyperlink
-        print( album_name + '\n' + album_url )
+        album_list.append( album_name )
+        #from page get hyperlink to the singer's page
+        #But i find the design feature about the URL of singer's page
+        #So i don't adopt this method, but it's a safe methond
+        #album_url = reg_href.findall( tmp )[0][6:-1]
+        #album_list[album_name] = album_url
+    return album_list
 
 def ParseAlbum( singer, album ):
     
@@ -74,6 +80,47 @@ def ParseAlbum( singer, album ):
 
     return songList
 
+def Singer( singer ):
+    """
+        This Function use to generate the singer's all song information
+        about download URL.
+        
+        Return a dict such as {singer's name:DownLoadURL}
+    """
+    dictAlbum = {}
+    #Get album list
+    albums = albumList( singer )
+
+    for album in albums:
+        #Get all the Song in album
+        songs = ParseAlbum( singer, album )
+        dictSong = {}
+        for song in songs:
+            keywords = singer + " " + album + " " + song
+            page = search.search( keywords )
+            lists = search.ParseResult( page )
+            lists = RefinedResult( lists, keywords.split() )
+            dictSong[song] = lists
+            #print(lists)
+        dictAlbum[album] = dictSong
+
+    return {"'" + singer + "'":dictAlbum}
+
+def RefinedResult( items, keywords ):
+    """
+        items   Input a List contain down page
+        keywords    Input a list contain some keywords, for instance,
+                    singer, album, song's title
+
+        Return a refined list only contain download url
+    """
+    result_refine = []
+    #refined the result to drop some item
+    for item in items:
+        if item['singer'] == keywords[0] and item['album'] == keywords[1] and \
+           item['title'] == keywords[2]:
+            result_refine += item['url']
+    return result_refine
 
 if __name__ == '__main__':
 #   singers = singer()
@@ -82,6 +129,7 @@ if __name__ == '__main__':
 #   for name, url in singers.items():
 #       print(name)
 #   print(url)
-#   albumList( '王菲' )
-    ParseAlbum( '王菲','王靖雯' )
+#   print( albumList( '王菲' ) )
+#   print( ParseAlbum( '王菲','王靖雯' ) )
+    Singer( '阿果' )
 
