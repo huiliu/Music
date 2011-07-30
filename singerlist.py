@@ -2,10 +2,12 @@
 
 from urllib.request import urlopen
 from urllib.parse import urlencode, quote
+from common import ParseHtml
+from pprint import pprint
 import search
 import re
 
-def singerList():
+def AllSingerList():
     """
     USAGE:
         return singer list.
@@ -117,10 +119,84 @@ def RefinedResult( items, keywords ):
     result_refine = []
     #refined the result to drop some item
     for item in items:
-        if item['singer'] == keywords[0] and item['album'] == keywords[1] and \
-           item['title'] == keywords[2]:
+        if item['singer'] == keywords[0] and item['album'] == keywords[1]\
+           and  item['title'] == keywords[2]:
             result_refine += item['url']
     return result_refine
+
+def topSinger():
+    """
+        The function use to get top 200 singer's name
+    """
+    reg_list = re.compile('<div class="singer">.*?</a>')
+    reg_pure = re.compile('[\n\t\r\v\f]')
+    reg_singer = re.compile('>.*?<')
+    url = 'http://list.mp3.baidu.com/top/top200.html'
+    HotSinger = []
+
+    page = reg_pure.sub('', urlopen( url ).read().decode('gbk'))
+    html_singer = reg_list.findall( page )
+    for tmp in html_singer:
+        name = reg_singer.findall( tmp )[1][1:-1]
+        HotSinger.append(name)
+    return HotSinger
+
+def new100():
+    """
+        the function use to get the new 100 singer.
+    """
+    reg_pure = re.compile('[\n\t\r\v\f]')
+    url = 'http://list.mp3.baidu.com/top/top100.html'
+    page = reg_pure.sub('', urlopen( url ).read().decode('gbk'))
+
+
+    reg_rank = re.compile('<em.*?</em>')
+    reg_status = re.compile('<div class="status">.*?</i>')
+    reg_title  = re.compile('<div class="music-name">.*?</a>')
+    reg_singer = re.compile('<div class="singer">.*?</a>')
+    reg = re.compile('>.*?<')
+
+    top100 = []
+    rank   = reg_rank.findall(page)
+    status = reg_status.findall(page)
+    title  = reg_title.findall(page)
+    singer = reg_singer.findall(page)
+
+    for a, b, c, d in zip( rank, status, title, singer):
+        a = reg.findall(a)[0][1:-1]
+        b = reg.findall(b)[-1][1:-1]
+        c = reg.findall(c)[-1][1:-1]
+        d = reg.findall(d)[-1][1:-1]
+        top100.append({'rank':a, 'status':b, 'title':c, 'singer':d})
+    return top100
+
+def interface():
+    """
+    """
+    tips_singer = "Please Type in the singer's name \
+which you want to know: "
+    name = input(tips_singer)
+    albums = albumList( name )
+    tips_albums = "{} has {} albums. Would you like to look it?(Y/N):"
+    x = input( tips_albums.format(name, len(albums)) )
+    if x == 'Y':
+        pprint(albums)
+    elif x == 'N':
+        tips_top = "Would you like to look the lastest top 200 singer?(Y/N):"
+        x = input( tips_top )
+        if x == 'Y':
+            hot = topSinger()
+            pprint(hot)
+        else:
+            tips_top100 = "Would you like to look top 100 songs?(Y/N):"
+            if input(tips_top100) == 'Y':
+                hot100 = new100()
+                print( hot100 )
+
+            print("Developing......")
+    else:
+        print('>>>>>>Input Error! Please input according the tips.<<<<<\n')
+
 
 if __name__ == '__main__':
 #   singers = singer()
@@ -129,7 +205,5 @@ if __name__ == '__main__':
 #   for name, url in singers.items():
 #       print(name)
 #   print(url)
-#   print( albumList( '王菲' ) )
-#   print( ParseAlbum( '王菲','王靖雯' ) )
-    Singer( '阿果' )
+    interface()
 
