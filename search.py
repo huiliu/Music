@@ -83,7 +83,10 @@ def item( page, regExp ):
             texts.append( myParser.text.strip().replace('正版', '(正版)') )
             if i == 1:
                 #hyperlink to down page
-                URL.append( myParser.url.strip() )
+                downPage = myParser.url.strip() 
+                #The music's download hyperlink
+                downURL = DownloadURL( downPage )
+                URL.append( downURL )
         i += 1
         data.append( texts )
     data += [URL]
@@ -96,7 +99,7 @@ def item( page, regExp ):
                     "index":index, \
                     "title":title, \
                     "singer":singer, \
-                    "ablum":ablum, \
+                    "album":ablum, \
                     "lyric":lyric, \
                     "formation":formation, \
                     "size":size, \
@@ -135,6 +138,7 @@ def ParseResult( data ):
                 ]
     
     lists = item( data, reg_list )
+
     return lists
 
 def DownloadURL( url ):
@@ -142,7 +146,7 @@ def DownloadURL( url ):
         USAGE:
             return a url list about the song you want to listen.
     """
-    print(url)
+    #print(url)
     reg = re.compile('subulrs =.*?]')
     reg_head = re.compile('encurl.*?,')
     
